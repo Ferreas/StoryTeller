@@ -1,16 +1,31 @@
 ﻿using System;
 using System.IO;
 
+
+
+/*
+ * ChangeLog goes here
+ * Yes, I do know this isn't the right place for it
+ * So...
+ * 
+ * New stuff:
+ * +Now the game will greet us with default name and later we'll be able to change it
+ * +Changed name now will replace default tellers name in OrdinaryText(string) 
+ * 
+ * Removed stuff:
+ * 
+ * Changed stuff:
+ * ~Default folder for scripts is now documents->Storyteller. No more randomly stockpiling useless stuff in documents core folder.
+ * ~Now default tellers name will be written in Cyan.
+ */
+
+
 namespace StoryTeller
 {
     class Program
     {
         static void Main(string[] args)
         {
-            //TheTeller Teller = new TheTeller();
-            //string _path = "source.txt";
-            //Teller.LoadScript(_path);
-            //Teller.ReadStory();
             MENU New_Game = new MENU();
             New_Game.ShowMenu();
         }
@@ -19,13 +34,14 @@ namespace StoryTeller
 
     class TheTeller
     {
+        static public string TellersName;
         //main and most important array carrying the whole story
         string[] script;
         //'Default' path to the array, may be changed in future
         internal int status = 0;
         // Set a variable to the Documents path.
-        internal string docPath =
-          Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        internal string docPath = Path.Combine(
+          Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),"StoryTeller");
         string ScriptFilePath = "";
 
         //Tries to load the script, if it doesn't exist shows the exception and closes the game
@@ -55,7 +71,11 @@ namespace StoryTeller
             {
                 case '0':
                     {
-                        Console.WriteLine("Story Teller:\n" + ToSay.Substring(1));
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        Console.WriteLine(TellersName);
+                        Console.ForegroundColor = ConsoleColor.White;
+                        Console.WriteLine(ToSay.Substring(1));
+                        
                     }
                     break;
                 case '1':
@@ -202,81 +222,5 @@ namespace StoryTeller
         }
     }
 
-    class MENU : TheTeller
-    {
-        //Shows the main menu of the game
-        public void ShowMenu()
-        {
-            string selected = "";
-            Console.Clear();
-            Console.WriteLine(
-                "=========THE STORYTELLER===========\n" +
-                "1)New Game\n" +
-                "2)Load Game\n" +
-                "3)Help\n" +
-                "4)Exit"
-                );
-            selected = Console.ReadLine();
-            switch (selected)
-            {
-                //New game button handler
-                case "1":
-                    LoadScript(Path.Combine(base.docPath, "source.txt"));
-                    base.status = 0;
-                    ReadStory(0);
-                    break;
-                //Load game button handler
-                case "2":
-                    LoadGame();
-                    break;
-                //Help button handler
-                case "3":
-                    Console.Clear();
-                    Console.WriteLine(
-                        "Greetings, Traveler!\n\n" +
-                        "This is an interactive novel\n" +
-                        "As you read it you will be able to affect the flow of it\n\n\n" +
-                        "To navigate through the story press LEFT and RIGHT keys\n" +
-                        "If you made a dicision or passed vital point you won't be able to look back\n\n" +
-                        "To save the game press S\n" +
-                        "To Exit to main manu press E\n" +
-                        "Loading the game is only possible from Main Menu\n\n" +
-                        "Wish you a good time reading it!"
-                        );
-                    Console.ReadKey();
-                    break;
-                //Exit button handler
-                case "4":
-                    Environment.Exit(0);
-                    break;
-            }
-            //Loop
-            ShowMenu();
-        }
-
-        //Load game 
-        public void LoadGame()
-        {
-            //Temporary string array to allocate loading data
-            string[] temp;
-            //tries to load and starts the game with loaded preset if possible
-            try
-            {
-                using (StreamReader sr = new StreamReader(Path.Combine(base.docPath, "SaveGame.txt"), System.Text.Encoding.Default))
-                {
-                    temp = sr.ReadToEnd().Split('\n');
-                    LoadScript(temp[0].Substring(0, temp[0].Length - 1));
-                    base.status = Convert.ToInt32(temp[2]);
-                    ReadStory(Convert.ToInt32(temp[1]));
-                }
-            }
-            //catches the exception and throws you to main menu if something went wrong
-            catch (Exception)
-            {
-                Console.WriteLine("Corrupted save file, only new game possible now!");
-                ShowMenu();
-            }
-        }
-
-    }
+    
 }
