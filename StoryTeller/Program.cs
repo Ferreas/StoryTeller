@@ -17,6 +17,7 @@ using System.IO;
  * Changed stuff:
  * ~Default folder for scripts is now documents->Storyteller. No more randomly stockpiling useless stuff in documents core folder.
  * ~Now default tellers name will be written in Cyan.
+ * 
  */
 
 
