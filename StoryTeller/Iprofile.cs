@@ -1,6 +1,6 @@
 ﻿namespace StoryTeller
 {
-    //interface with likeminimal requirment for my class
+    //interface with like minimal requirment for my class
     interface IProfile
     {
         string Name { get; set; }

@@ -5,7 +5,20 @@ namespace StoryTeller
 {
     class MENU : TheTeller
     {
+        //Declaring delegate
+        public delegate void ExitDoor();
+        //The event
+        public event ExitDoor Leaving;
+        //Creating new default Teller
         Teller teller = new Teller("Story Teller");
+
+        //constructor
+        public MENU()
+        {
+            //binding GetOut function to Leaving event
+            Leaving += GetOut;
+        }
+
         //Shows the main menu of the game
         public void ShowMenu()
         {
@@ -56,7 +69,7 @@ namespace StoryTeller
                     break;
                 //Exit button handler
                 case "5":
-                    Environment.Exit(0);
+                    Leaving();
                     break;
             }
             //Loop
@@ -83,19 +96,15 @@ namespace StoryTeller
                     Console.WriteLine($"Name set to {TellersName}\nPress any key to continue");
                     Console.ReadKey();
                     break;
-                    //going back...
+                //going back...
                 case "2":
                     bLoop = false;
                     break;
             }
 
-            (bLoop ? (Action)Options:ShowMenu)();
+            //little tricky Action() delegate
+            (bLoop ? (Action)Options : ShowMenu)();
         }
-
-
-
-
-
 
         //Load game 
         public void LoadGame()
@@ -121,5 +130,50 @@ namespace StoryTeller
             }
         }
 
+        //Handler for Leaving action
+        public void GetOut()
+        {
+            //Well, are you really sure you want to?
+            Console.WriteLine("Are you sure, you want to leave? y/n");
+            //declaring decided() abstract lambda method to change and use it after;
+            Action decided = () => { Console.WriteLine(); };
+            
+            //default abstract metod to read users input and return result as a code symbol 1\2\3
+            Func<int> Decision = delegate
+            {
+                switch (Console.ReadKey(true).Key)
+                {
+                    case ConsoleKey.Y:
+                        return 1;
+                    case ConsoleKey.N:
+                        return 2;
+                    default:
+                        return 3;
+                }
+            };
+
+            //redefining decided()
+            decided = () =>
+            {
+                //if Decision() returned:
+                switch (Decision())
+                {
+                    case 1:
+                        //Exit programm
+                        Environment.Exit(0);
+                        break;
+                    case 2:
+                        //Do nothing adn return to main menu
+                        break;
+                    default:
+                        //read again and wait until something legit comes as output
+                        decided();
+                        //And yes, this one little recursion here is the reason to declare decided() beforehand
+                        //Other way it just says "Use of an unassigned local variable"
+                        break;
+                }
+            };
+            decided();
+        }
     }
 }
