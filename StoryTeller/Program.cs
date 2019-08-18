@@ -3,24 +3,6 @@ using System.IO;
 
 
 
-/*
- * ChangeLog goes here
- * Yes, I do know this isn't the right place for it
- * So...
- * 
- * New stuff:
- * +Now the game will greet us with default name and later we'll be able to change it
- * +Changed name now will replace default tellers name in OrdinaryText(string) 
- * 
- * Removed stuff:
- * 
- * Changed stuff:
- * ~Default folder for scripts is now documents->Storyteller. No more randomly stockpiling useless stuff in documents core folder.
- * ~Now default tellers name will be written in Cyan.
- * 
- */
-
-
 namespace StoryTeller
 {
     class Program
@@ -35,6 +17,14 @@ namespace StoryTeller
 
     class TheTeller
     {
+        //Setting default font color
+        public static ConsoleColor DefaultColor = ConsoleColor.White;
+        //Creating new default Teller
+        public Teller teller = new Teller("Story Teller", DefaultColor);
+        //Creating character list 
+        public CharacterList<string> CharsL = new CharacterList<string>();
+        
+
         static public string TellersName;
         //main and most important array carrying the whole story
         string[] script;
@@ -42,7 +32,7 @@ namespace StoryTeller
         internal int status = 0;
         // Set a variable to the Documents path.
         internal string docPath = Path.Combine(
-          Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),"StoryTeller");
+          Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "StoryTeller");
         string ScriptFilePath = "";
 
         //Tries to load the script, if it doesn't exist shows the exception and closes the game
@@ -65,6 +55,29 @@ namespace StoryTeller
 
         }
 
+        //Method to try loading characters from special file to the character list
+        public void LoadCharacters(string path)
+        {
+            string[] chars;
+            try
+            {
+                using (StreamReader sr = new StreamReader(Path.Combine(docPath, path), System.Text.Encoding.Default))
+                {
+                    chars = sr.ReadToEnd().Split('\n');
+                    foreach (string s in chars)
+                    {
+                        string[] NameColor = s.Split(';');
+                        CharsL.AddCharacter(NameColor[0], NameColor[1]);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Corrupted characters file, unable to load.\nDefault colors will be set for character that were unable to be loaded");
+                Console.ReadKey();
+            }
+        }
+
         //Shows text on the screen like said by Narator or some charackter
         public void OrdinaryText(string ToSay)
         {
@@ -72,20 +85,23 @@ namespace StoryTeller
             {
                 case '0':
                     {
-                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        //Teller has his own font color that can be changed in settings
+                        Console.ForegroundColor = teller.Color;
                         Console.WriteLine(TellersName);
-                        Console.ForegroundColor = ConsoleColor.White;
+                        Console.ForegroundColor = DefaultColor;
                         Console.WriteLine(ToSay.Substring(1));
-                        
                     }
                     break;
                 case '1':
                     {
-                        Console.WriteLine(
-                            ToSay.Substring(2, ToSay.IndexOf('"', 2) - 2)
-                            + ":\n"
-                            + ToSay.Substring(ToSay.IndexOf('"', 2) + 1)
-                            );
+                        //Gets characters name
+                        string Cname = ToSay.Substring(2, ToSay.IndexOf('"', 2) - 2);
+                        //Spells name in color assinged in chars list, if no color assigned Default color will be set
+                        Console.ForegroundColor = CharsL.GetCharactersColor(Cname);
+                        Console.WriteLine(Cname);
+                        //Changing back to default color to go on with ordinary text
+                        Console.ForegroundColor = DefaultColor;
+                        Console.WriteLine(ToSay.Substring(ToSay.IndexOf('"', 2) + 1));
                     }
                     break;
             }
@@ -150,7 +166,7 @@ namespace StoryTeller
                         double trigger = char.GetNumericValue(script[i][1]) * 10 + char.GetNumericValue(script[i][2]);
                         if (trigger == 0 || (status >= trigger && status != 0))
                         {
-                            LoadScript(docPath+script[i].Substring(3, script[i].Length - 4));
+                            LoadScript(docPath + script[i].Substring(3, script[i].Length - 4));
                             i = 0;
                             status = 0;
                             continue;
@@ -161,6 +177,11 @@ namespace StoryTeller
                             i++;
                             continue;
                         }
+                        break;
+                    case '9':
+                        LoadCharacters(script[i].Substring(1, script[i].Length - 2));
+                        i++;
+                        continue;
                         break;
                 }
                 AwaitKey(i, out i);
@@ -223,5 +244,5 @@ namespace StoryTeller
         }
     }
 
-    
+
 }

@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="aPerson.cs" />
+    <Compile Include="CharacterList.cs" />
     <Compile Include="IProfile.cs" />
     <Compile Include="MENU.cs" />
     <Compile Include="Program.cs" />

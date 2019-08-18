@@ -9,9 +9,7 @@ namespace StoryTeller
         public delegate void ExitDoor();
         //The event
         public event ExitDoor Leaving;
-        //Creating new default Teller
-        Teller teller = new Teller("Story Teller");
-
+        
         //constructor
         public MENU()
         {
@@ -24,16 +22,7 @@ namespace StoryTeller
         {
             string selected = "";
             Console.Clear();
-            Console.WriteLine(
-                "=========THE STORYTELLER===========\n" +
-                $"Hello {TellersName}\n\n" +
-                "1)New Game\n" +
-                "2)Load Game\n" +
-                "3)Help\n" +
-                "4)Options\n" +
-                "5)Exit"
-                );
-
+            MenuText();
 
             selected = Console.ReadLine();
             switch (selected)
@@ -42,6 +31,9 @@ namespace StoryTeller
                 case "1":
                     LoadScript(Path.Combine(base.docPath, "source.txt"));
                     base.status = 0;
+                    Console.Clear();
+                    StarterTips();
+                    Console.ReadKey(true);
                     ReadStory(0);
                     break;
                 //Load game button handler
@@ -51,17 +43,7 @@ namespace StoryTeller
                 //Help button handler
                 case "3":
                     Console.Clear();
-                    Console.WriteLine(
-                        "Greetings, Traveler!\n\n" +
-                        "This is an interactive novel\n" +
-                        "As you read it you will be able to affect the flow of it\n\n\n" +
-                        "To navigate through the story press LEFT and RIGHT keys\n" +
-                        "If you made a dicision or passed vital point you won't be able to look back\n\n" +
-                        "To save the game press S\n" +
-                        "To Exit to main manu press E\n" +
-                        "Loading the game is only possible from Main Menu\n\n" +
-                        "Wish you a good time reading it!"
-                        );
+                    HelpText();
                     Console.ReadKey();
                     break;
                 case "4":
@@ -76,13 +58,53 @@ namespace StoryTeller
             ShowMenu();
         }
 
+        private static void MenuText()
+        {
+            Console.WriteLine(
+                "=========THE STORYTELLER===========\n" +
+                $"Hello {TellersName}\n\n" +
+                "1)New Game\n" +
+                "2)Load Game\n" +
+                "3)Help\n" +
+                "4)Options\n" +
+                "5)Exit"
+                );
+        }
+
+        private static void HelpText()
+        {
+            Console.WriteLine(
+                "Greetings, Traveler!\n\n" +
+                "This is an interactive novel\n" +
+                "As you read it you will be able to affect the flow of it\n\n\n" +
+                "To navigate through the story press LEFT and RIGHT keys\n" +
+                "If you made a dicision or passed vital point you won't be able to look back\n\n" +
+                "To save the game press S\n" +
+                "To Exit to main manu press E\n" +
+                "Loading the game is only possible from Main Menu\n\n" +
+                "Wish you a good time reading it!\n\n" +
+                "Press any key to continue"
+                );
+        }
+
+        private static void StarterTips()
+        {
+            Console.WriteLine("Press:\n " +
+                                    "Right arrow key to proceed through story\n" +
+                                    "Left arrow key to rewind\n" +
+                                    "S - to save current game progress\n" +
+                                    "E - to exit the game\n" +
+                                    "Press any key to start reading");
+        }
+
         //Oh well, here we go with some options to customize our storytelling machine
         private void Options()
         {
             Console.Clear();
             Console.WriteLine(
                    "1)Change Name\n" +
-                   "2)Go Back"
+                   "2)Change Color\n" +
+                   "3)Go Back"
                    );
 
             bool bLoop = true;
@@ -98,6 +120,9 @@ namespace StoryTeller
                     break;
                 //going back...
                 case "2":
+                    teller.SetTellersColor();
+                    break;
+                case "3":
                     bLoop = false;
                     break;
             }
@@ -105,6 +130,7 @@ namespace StoryTeller
             //little tricky Action() delegate
             (bLoop ? (Action)Options : ShowMenu)();
         }
+
 
         //Load game 
         public void LoadGame()
@@ -137,7 +163,7 @@ namespace StoryTeller
             Console.WriteLine("Are you sure, you want to leave? y/n");
             //declaring decided() abstract lambda method to change and use it after;
             Action decided = () => { Console.WriteLine(); };
-            
+
             //default abstract metod to read users input and return result as a code symbol 1\2\3
             Func<int> Decision = delegate
             {
@@ -163,7 +189,7 @@ namespace StoryTeller
                         Environment.Exit(0);
                         break;
                     case 2:
-                        //Do nothing adn return to main menu
+                        //Do nothing and return to main menu
                         break;
                     default:
                         //read again and wait until something legit comes as output
@@ -173,6 +199,7 @@ namespace StoryTeller
                         break;
                 }
             };
+
             decided();
         }
     }

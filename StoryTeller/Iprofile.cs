@@ -4,6 +4,5 @@
     interface IProfile
     {
         string Name { get; set; }
-        void vChangeName(string newName);
     }
 }
